@@ -1,9 +1,9 @@
-'use client'
+"use client";
+
+import MainEditor from "@/components/editor";
 
 const EditorPage = () => {
-    return (
-        <div>EditorPage</div>
-    )
-}
+    return <MainEditor />;
+};
 
-export default EditorPage
+export default EditorPage;
