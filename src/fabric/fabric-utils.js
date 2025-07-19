@@ -93,3 +93,62 @@ export const addTextToCanvas = async (canvas, text, options = {}, withBackground
         return null
     }
 }
+
+export const toggleDrawingMode = (canvas, isDrawingMode, drawingColor = "#000000", brushWidth = 5) => {
+    if (!canvas) return null
+
+    try {
+        canvas.isDrawingMode = isDrawingMode
+
+        if (isDrawingMode) {
+            canvas.freeDrawingBrush.color = drawingColor
+            canvas.freeDrawingBrush.width = brushWidth
+        }
+
+        return true
+    } catch (e) {
+        return false
+    }
+}
+
+export const toggleEraseMode = (canvas, isErasing, previousColor = "#000000", eraserWidth = 20, brushWidth = 5) => {
+    if (!canvas || !canvas.freeDrawingBrush) return false
+
+    try {
+        if (isErasing) {
+            canvas.freeDrawingBrush.color = '#ffffff'
+            canvas.freeDrawingBrush.width = eraserWidth
+        }
+        else {
+            canvas.freeDrawingBrush.color = previousColor
+            canvas.freeDrawingBrush.width = brushWidth
+        }
+
+        return true
+    } catch (e) {
+        return false
+    }
+}
+
+export const updateDrawingBrush = (canvas, properties = {}) => {
+    if (!canvas || !canvas.freeDrawingBrush) return false;
+
+    try {
+        const { color, width, opacity } = properties;
+        if (color !== undefined) {
+            canvas.freeDrawingBrush.color = color;
+        }
+
+        if (width !== undefined) {
+            canvas.freeDrawingBrush.width = width;
+        }
+
+        if (opacity !== undefined) {
+            canvas.freeDrawingBrush.opacity = opacity;
+        }
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
