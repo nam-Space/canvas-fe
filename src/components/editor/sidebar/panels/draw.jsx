@@ -179,7 +179,7 @@ const DrawingPanel = () => {
                                                 className={
                                                     "w-12 h-10 p-1 cursor-pointer"
                                                 }
-                                                disable={isErasing}
+                                                disabled={isErasing}
                                             />
                                         </div>
                                         <Input
@@ -191,7 +191,7 @@ const DrawingPanel = () => {
                                                 )
                                             }
                                             className={"flex-1"}
-                                            disable={isErasing}
+                                            disabled={isErasing}
                                         />
                                     </div>
                                 </div>
