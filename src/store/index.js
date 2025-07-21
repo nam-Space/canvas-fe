@@ -20,6 +20,8 @@ export const useEditorStore = create((set, get) => ({
     name: '',
     setName: value => set({ name: value }),
 
+    showProperties: false,
+    setShowProperties: flag => set({ showProperties: flag }),
 
     resetStore: () => {
         set({

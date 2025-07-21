@@ -14,6 +14,15 @@ const Canvas = () => {
         const cleanUpCanvas = () => {
             if (fabricCanvasRef.current) {
                 try {
+                    fabricCanvasRef.current.off("object:added");
+                    fabricCanvasRef.current.off("object:modified");
+                    fabricCanvasRef.current.off("object:removed");
+                    fabricCanvasRef.current.off("path:created");
+                } catch (e) {
+                    console.error("Error removing event listeners", e);
+                }
+
+                try {
                     fabricCanvasRef.current.dispose();
                 } catch (e) {
                     console.error("Error disposing canvas", e);
@@ -56,6 +65,15 @@ const Canvas = () => {
                 setCanvas(fabricCanvas);
 
                 console.log("Canvas init is done and set in store");
+
+                const handleCanvasChange = () => {
+                    // console.log("change");
+                };
+
+                fabricCanvas.on("object:added", handleCanvasChange);
+                fabricCanvas.on("object:modified", handleCanvasChange);
+                fabricCanvas.on("object:removed", handleCanvasChange);
+                fabricCanvas.on("path:created", handleCanvasChange);
             } catch (e) {
                 console.error("Failed to init canvas", e);
             }

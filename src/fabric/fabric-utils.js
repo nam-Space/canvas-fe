@@ -1,3 +1,4 @@
+import { MAX_DIMENSION } from '@/constants/dimension'
 import { shapeDefinitions } from './shapes/shape-definitions'
 import { createShape } from './shapes/shape-factory'
 
@@ -114,7 +115,7 @@ export const addImageToCanvas = async (canvas, imageUrl) => {
                     cornorSize: 10
                 })
 
-                const maxDimension = 400
+                const maxDimension = MAX_DIMENSION
 
                 if (image.width > maxDimension || image.height > maxDimension) {
                     if (image.width > image.height) {
@@ -199,5 +200,46 @@ export const updateDrawingBrush = (canvas, properties = {}) => {
         return true;
     } catch (e) {
         return false;
+    }
+}
+
+export const cloneSelectedObject = async (canvas) => {
+    if (!canvas) return
+
+    const activeObject = canvas.getActiveObject()
+    if (!activeObject) return
+
+    try {
+        const clonedObj = await activeObject.clone()
+
+        clonedObj.set({
+            left: activeObject.left + 10,
+            top: activeObject.top + 10,
+            id: `${activeObject.type || 'object'}-${Date.now()}`
+        })
+
+        canvas.add(clonedObj)
+        canvas.renderAll()
+
+        return clonedObj
+    } catch (e) {
+        console.error('Error while cloning', e)
+        return null
+    }
+}
+
+export const deletedSelectedObject = (canvas) => {
+    if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject()
+    if (!activeObject) return
+
+    try {
+        canvas.remove(activeObject)
+        canvas.discardActiveObject()
+        canvas.renderAll()
+    } catch (e) {
+        console.error('Error while deleting', e)
+        return null
     }
 }
