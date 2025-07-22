@@ -166,7 +166,7 @@ export const toggleEraseMode = (canvas, isErasing, previousColor = "#000000", er
 
     try {
         if (isErasing) {
-            canvas.freeDrawingBrush.color = '#ffffff'
+            canvas.freeDrawingBrush.color = canvas.backgroundColor
             canvas.freeDrawingBrush.width = eraserWidth
         }
         else {

@@ -7,14 +7,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useEditorStore } from "@/store";
-import { ChevronDown, Eye, LogOut, Pencil, Save, Star } from "lucide-react";
+import {
+    ChevronDown,
+    Download,
+    Eye,
+    LogOut,
+    Pencil,
+    Save,
+    Star,
+} from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import ExportModal from "../export";
 
 const Header = () => {
     const { canvas, isEditing, setIsEditing, name, setName } = useEditorStore();
-
     const { data: session } = useSession();
+    const [showExportModal, setShowExportModal] = useState(false);
 
     const handleLogout = async () => {
         await signOut();
@@ -52,6 +61,13 @@ const Header = () => {
                 </DropdownMenu>
                 <button className="header-button ml-3 relative" title="Save">
                     <Save className="w-5 h-5" />
+                </button>
+                <button
+                    onClick={() => setShowExportModal(true)}
+                    className="header-button ml-3 relative"
+                    title="Download"
+                >
+                    <Download className="w-5 h-5" />
                 </button>
             </div>
             <div className="flex-1 flex justify-center max-w-md">
@@ -96,6 +112,10 @@ const Header = () => {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
+            <ExportModal
+                isOpen={showExportModal}
+                onClose={setShowExportModal}
+            />
         </header>
     );
 };
