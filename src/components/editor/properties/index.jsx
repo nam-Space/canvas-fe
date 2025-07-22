@@ -39,6 +39,9 @@ const Properties = () => {
         opacity: 100,
         width: 0,
         height: 0,
+        borderColor: "#000000",
+        borderWidth: 0,
+        borderStyle: "solid",
     });
 
     const [textProperties, setTextProperties] = useState({
@@ -53,6 +56,15 @@ const Properties = () => {
         letterSpacing: 0,
     });
 
+    const [shapeProperties, setShapeProperties] = useState({
+        fillColor: "#ffffff",
+    });
+
+    const [imageProperties, setImageProperties] = useState({
+        filter: "none",
+        blur: 0,
+    });
+
     useEffect(() => {
         if (!canvas) return;
 
@@ -62,14 +74,37 @@ const Properties = () => {
             if (activeObject) {
                 setSelectedObject(activeObject);
 
+                const newProperties = {
+                    borderStyle: "solid",
+                };
+
+                if (activeObject.strokeDashArray) {
+                    if (
+                        activeObject.strokeDashArray[0] === 5 &&
+                        activeObject.strokeDashArray[1] === 5
+                    ) {
+                        newProperties.borderStyle = "dashed";
+                    } else if (
+                        activeObject.strokeDashArray[0] === 2 &&
+                        activeObject.strokeDashArray[1] === 2
+                    ) {
+                        newProperties.borderStyle = "dotted";
+                    } else {
+                        newProperties.borderStyle = "solid";
+                    }
+                }
+
                 //update common properties
                 setCommonProperties({
                     ...commonProperties,
+                    ...newProperties,
                     opacity: Math.round(activeObject.opacity * 100) || 100,
                     width: Math.round(activeObject.width * activeObject.scaleX),
                     height: Math.round(
                         activeObject.height * activeObject.scaleY
                     ),
+                    borderColor: activeObject.stroke || "#000000",
+                    borderWidth: activeObject.strokeWidth || 0,
                 });
 
                 if (activeObject.type === "i-text") {
@@ -89,10 +124,40 @@ const Properties = () => {
                     });
                 } else if (activeObject.type === "image") {
                     setObjectType("image");
+
+                    const newProps = {
+                        filter: "none",
+                        blur: 0,
+                    };
+
+                    if (activeObject?.filters?.length > 0) {
+                        const filterObj = activeObject.filters[0];
+                        if (filterObj.type === "Grayscale") {
+                            newProps.filter = "grayscale";
+                        } else if (filterObj.type === "Sepia") {
+                            newProps.filter = "sepia";
+                        } else if (filterObj.type === "Invert") {
+                            newProps.filter = "invert";
+                        } else if (filterObj.type === "Blur") {
+                            newProps.filter = "blur";
+                            newProps.blur = filterObj.blur * 100;
+                        } else {
+                            newProps.filter = "none";
+                        }
+                    }
+
+                    setImageProperties({
+                        ...imageProperties,
+                        ...newProps,
+                    });
                 } else if (activeObject.type === "path") {
                     setObjectType("path");
                 } else {
                     setObjectType("shape");
+
+                    setShapeProperties({
+                        ...shapeProperties,
+                    });
                 }
             }
         };
@@ -125,6 +190,75 @@ const Properties = () => {
 
         selectedObject.set(property, val);
         canvas.renderAll();
+    };
+
+    const handleImageFilterChange = async (val) => {
+        setImageProperties({
+            ...imageProperties,
+            filter: val,
+        });
+
+        if (!canvas || !selectedObject || selectedObject.type !== "image")
+            return;
+
+        try {
+            const { filters } = await import("fabric");
+
+            selectedObject.filters = [];
+
+            switch (val) {
+                case "grayscale":
+                    selectedObject.filters.push(new filters.Grayscale());
+                    break;
+                case "sepia":
+                    selectedObject.filters.push(new filters.Sepia());
+                    break;
+                case "invert":
+                    selectedObject.filters.push(new filters.Invert());
+                    break;
+                case "blur":
+                    selectedObject.filters.push(
+                        new filters.Blur({ blur: imageProperties.blur / 100 })
+                    );
+                    break;
+                case "none":
+                default:
+                    break;
+            }
+
+            selectedObject.applyFilters();
+            canvas.renderAll();
+        } catch (e) {
+            console.error("Failed to apply filters");
+        }
+    };
+
+    const handleBlurChange = async (val) => {
+        const newBlurVal = val[0];
+        setImageProperties({
+            ...imageProperties,
+            blur: newBlurVal,
+        });
+
+        if (
+            !canvas ||
+            !selectedObject ||
+            selectedObject.type !== "image" ||
+            imageProperties.filter !== "blur"
+        ) {
+            return;
+        }
+
+        try {
+            const { filters } = await import("fabric");
+            selectedObject.filters = [
+                new filters.Blur({ blur: newBlurVal / 100 }),
+            ];
+            selectedObject.applyFilters();
+            canvas.renderAll();
+        } catch (e) {
+            console.error("Error while applying blur", e);
+        }
     };
 
     return (
@@ -562,6 +696,425 @@ const Properties = () => {
                                     );
                                 }}
                             />
+                        </div>
+                    </div>
+                )}
+
+                {/* Shape related properties */}
+                {objectType === "shape" && (
+                    <div className="space-y-4 pt-4 border-t">
+                        <h3 className="text-sm font-medium">
+                            Shape Properties
+                        </h3>
+                        <div className="flex justify-between">
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="fill-color"
+                                    className={"text-xs"}
+                                >
+                                    Fill Color
+                                </Label>
+                                <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                                    <div
+                                        className="absolute inset-0"
+                                        style={{
+                                            backgroundColor:
+                                                shapeProperties.fillColor,
+                                        }}
+                                    ></div>
+                                    <Input
+                                        id="fill-color"
+                                        type="color"
+                                        value={shapeProperties.fillColor}
+                                        onChange={(e) => {
+                                            const newFillColor = e.target.value;
+                                            setShapeProperties({
+                                                ...shapeProperties,
+                                                fillColor: newFillColor,
+                                            });
+                                            updateObjectProperty(
+                                                "fill",
+                                                newFillColor
+                                            );
+                                        }}
+                                        className={
+                                            "absolute inset-0 opacity-0 cursor-pointer"
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="border-color"
+                                    className={"text-xs"}
+                                >
+                                    Border Color
+                                </Label>
+                                <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                                    <div
+                                        className="absolute inset-0"
+                                        style={{
+                                            backgroundColor:
+                                                commonProperties.borderColor,
+                                        }}
+                                    ></div>
+                                    <Input
+                                        id="border-color"
+                                        type="color"
+                                        value={commonProperties.borderColor}
+                                        onChange={(e) => {
+                                            const newBorderColor =
+                                                e.target.value;
+                                            setCommonProperties({
+                                                ...commonProperties,
+                                                borderColor: newBorderColor,
+                                            });
+                                            updateObjectProperty(
+                                                "stroke",
+                                                newBorderColor
+                                            );
+                                        }}
+                                        className={
+                                            "absolute inset-0 opacity-0 cursor-pointer"
+                                        }
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="border-width" className={"text-xs"}>
+                                Border Width
+                            </Label>
+                            <span className="text-xs">
+                                {commonProperties.borderWidth}%
+                            </span>
+                            <Slider
+                                id="border-width"
+                                min={0}
+                                max={20}
+                                step={1}
+                                value={[commonProperties.borderWidth]}
+                                onValueChange={(val) => {
+                                    const newBorderWidth = val[0];
+                                    setCommonProperties({
+                                        ...commonProperties,
+                                        borderWidth: newBorderWidth,
+                                    });
+                                    updateObjectProperty(
+                                        "strokeWidth",
+                                        newBorderWidth
+                                    );
+                                }}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="border-style" className={"text-xs"}>
+                                Border Style
+                            </Label>
+                            <Select
+                                value={commonProperties.borderStyle}
+                                onValueChange={(val) => {
+                                    setCommonProperties({
+                                        ...commonProperties,
+                                        borderStyle: val,
+                                    });
+                                    let strokeDashArray = null;
+                                    if (val === "dashed") {
+                                        strokeDashArray = [5, 5];
+                                    } else if (val === "dotted") {
+                                        strokeDashArray = [2, 2];
+                                    }
+
+                                    updateObjectProperty(
+                                        "strokeDashArray",
+                                        strokeDashArray
+                                    );
+                                }}
+                            >
+                                <SelectTrigger
+                                    id="border-style"
+                                    className={"h-10"}
+                                >
+                                    <SelectValue placeholder="Select Border Style" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value={"solid"}>
+                                        Solid
+                                    </SelectItem>
+                                    <SelectItem value={"dashed"}>
+                                        Dashed
+                                    </SelectItem>
+                                    <SelectItem value={"dotted"}>
+                                        Dotted
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                )}
+                {objectType === "image" && (
+                    <div className="space-y-4 pt-4 border-t">
+                        <h3 className="text-sm font-medium">
+                            Image Properties
+                        </h3>
+                        <div className="space-y-2">
+                            <Label htmlFor="border-color" className={"text-xs"}>
+                                Border Color
+                            </Label>
+                            <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                                <div
+                                    className="absolute inset-0"
+                                    style={{
+                                        backgroundColor:
+                                            commonProperties.borderColor,
+                                    }}
+                                ></div>
+                                <Input
+                                    id="border-color"
+                                    type="color"
+                                    value={commonProperties.borderColor}
+                                    onChange={(e) => {
+                                        const newBorderColor = e.target.value;
+                                        setCommonProperties({
+                                            ...commonProperties,
+                                            borderColor: newBorderColor,
+                                        });
+                                        updateObjectProperty(
+                                            "stroke",
+                                            newBorderColor
+                                        );
+                                    }}
+                                    className={
+                                        "absolute inset-0 opacity-0 cursor-pointer"
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="border-width" className={"text-xs"}>
+                                Border Width
+                            </Label>
+                            <span className="text-xs">
+                                {commonProperties.borderWidth}%
+                            </span>
+                            <Slider
+                                id="border-width"
+                                min={0}
+                                max={20}
+                                step={1}
+                                value={[commonProperties.borderWidth]}
+                                onValueChange={(val) => {
+                                    const newBorderWidth = val[0];
+                                    setCommonProperties({
+                                        ...commonProperties,
+                                        borderWidth: newBorderWidth,
+                                    });
+                                    updateObjectProperty(
+                                        "strokeWidth",
+                                        newBorderWidth
+                                    );
+                                }}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="border-style" className={"text-xs"}>
+                                Border Style
+                            </Label>
+                            <Select
+                                value={commonProperties.borderStyle}
+                                onValueChange={(val) => {
+                                    setCommonProperties({
+                                        ...commonProperties,
+                                        borderStyle: val,
+                                    });
+                                    let strokeDashArray = null;
+                                    if (val === "dashed") {
+                                        strokeDashArray = [5, 5];
+                                    } else if (val === "dotted") {
+                                        strokeDashArray = [2, 2];
+                                    }
+
+                                    updateObjectProperty(
+                                        "strokeDashArray",
+                                        strokeDashArray
+                                    );
+                                }}
+                            >
+                                <SelectTrigger
+                                    id="border-style"
+                                    className={"h-10"}
+                                >
+                                    <SelectValue placeholder="Select Border Style" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value={"solid"}>
+                                        Solid
+                                    </SelectItem>
+                                    <SelectItem value={"dashed"}>
+                                        Dashed
+                                    </SelectItem>
+                                    <SelectItem value={"dotted"}>
+                                        Dotted
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="filter" className={"text-xs"}>
+                                Filter
+                            </Label>
+                            <Select
+                                value={imageProperties.filter}
+                                onValueChange={(val) =>
+                                    handleImageFilterChange(val)
+                                }
+                            >
+                                <SelectTrigger id="filter" className={"h-10"}>
+                                    <SelectValue placeholder="Select Image Filter" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value={"none"}>None</SelectItem>
+                                    <SelectItem value={"grayscale"}>
+                                        Grayscale
+                                    </SelectItem>
+                                    <SelectItem value={"sepia"}>
+                                        Sepia
+                                    </SelectItem>
+                                    <SelectItem value={"invert"}>
+                                        Invert
+                                    </SelectItem>
+                                    <SelectItem value={"blur"}>Blur</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {imageProperties.filter === "blur" && (
+                            <div className="space-y-2">
+                                <div className="flex justify-between mb-4">
+                                    <Label htmlFor="blur" className={"text-xs"}>
+                                        Blur Amount
+                                    </Label>
+                                    <span className="font-medium text-xs">
+                                        {imageProperties.blur}%
+                                    </span>
+                                </div>
+                                <Slider
+                                    id="blur"
+                                    min={0}
+                                    max={100}
+                                    step={1}
+                                    value={[imageProperties.blur]}
+                                    onValueChange={(val) => {
+                                        handleBlurChange(val);
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                )}
+                {objectType === "path" && (
+                    <div className="space-y-4 pt-4 border-t">
+                        <h3 className="text-sm font-medium">Path Properties</h3>
+                        <div className="space-y-2">
+                            <Label htmlFor="border-color" className={"text-xs"}>
+                                Border Color
+                            </Label>
+                            <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                                <div
+                                    className="absolute inset-0"
+                                    style={{
+                                        backgroundColor:
+                                            commonProperties.borderColor,
+                                    }}
+                                ></div>
+                                <Input
+                                    id="border-color"
+                                    type="color"
+                                    value={commonProperties.borderColor}
+                                    onChange={(e) => {
+                                        const newBorderColor = e.target.value;
+                                        setCommonProperties({
+                                            ...commonProperties,
+                                            borderColor: newBorderColor,
+                                        });
+                                        updateObjectProperty(
+                                            "stroke",
+                                            newBorderColor
+                                        );
+                                    }}
+                                    className={
+                                        "absolute inset-0 opacity-0 cursor-pointer"
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="border-width" className={"text-xs"}>
+                                Border Width
+                            </Label>
+                            <span className="text-xs">
+                                {commonProperties.borderWidth}%
+                            </span>
+                            <Slider
+                                id="border-width"
+                                min={0}
+                                max={20}
+                                step={1}
+                                value={[commonProperties.borderWidth]}
+                                onValueChange={(val) => {
+                                    const newBorderWidth = val[0];
+                                    setCommonProperties({
+                                        ...commonProperties,
+                                        borderWidth: newBorderWidth,
+                                    });
+                                    updateObjectProperty(
+                                        "strokeWidth",
+                                        newBorderWidth
+                                    );
+                                }}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="border-style" className={"text-xs"}>
+                                Border Style
+                            </Label>
+                            <Select
+                                value={commonProperties.borderStyle}
+                                onValueChange={(val) => {
+                                    setCommonProperties({
+                                        ...commonProperties,
+                                        borderStyle: val,
+                                    });
+                                    let strokeDashArray = null;
+                                    if (val === "dashed") {
+                                        strokeDashArray = [5, 5];
+                                    } else if (val === "dotted") {
+                                        strokeDashArray = [2, 2];
+                                    }
+
+                                    updateObjectProperty(
+                                        "strokeDashArray",
+                                        strokeDashArray
+                                    );
+                                }}
+                            >
+                                <SelectTrigger
+                                    id="border-style"
+                                    className={"h-10"}
+                                >
+                                    <SelectValue placeholder="Select Border Style" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value={"solid"}>
+                                        Solid
+                                    </SelectItem>
+                                    <SelectItem value={"dashed"}>
+                                        Dashed
+                                    </SelectItem>
+                                    <SelectItem value={"dotted"}>
+                                        Dotted
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 )}
