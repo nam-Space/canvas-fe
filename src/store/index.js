@@ -1,6 +1,8 @@
 'use client'
 
 import { centerCanvas } from "@/fabric/fabric-utils"
+import { saveCanvasState } from "@/services/design-service"
+import { debounce } from "lodash"
 import { create } from "zustand"
 
 export const useEditorStore = create((set, get) => ({
@@ -23,12 +25,64 @@ export const useEditorStore = create((set, get) => ({
     showProperties: false,
     setShowProperties: flag => set({ showProperties: flag }),
 
+    saveStatus: 'saved',
+    setSaveStatus: status => set({ saveStatus: status }),
+    lastModified: Date.now(),
+    isModified: false,
+
+    markAsModified: () => {
+        const designId = get().designId;
+
+        if (designId) {
+            set({
+                lastModified: Date.now(),
+                saveStatus: 'Saving...',
+                isModified: true
+            })
+
+            get().debouncedSaveToServer()
+        }
+        else {
+            console.error('No design ID Available')
+        }
+    },
+    saveToServer: async () => {
+        const designId = get().designId;
+        const canvas = get().canvas
+
+        if (!canvas || !designId) {
+            console.log('No design ID Available or canvas instance is not available')
+            return null
+        }
+
+        try {
+            const savedDesign = await saveCanvasState(canvas, designId, get().name)
+            set({
+                saveStatus: 'Saved',
+                isModified: false
+            })
+
+            return savedDesign
+        } catch (e) {
+            set({ saveStatus: 'Error' })
+            return null
+        }
+    },
+
+    debouncedSaveToServer: debounce(() => {
+        get().saveToServer()
+    }, 500),
+
     resetStore: () => {
         set({
             canvas: null,
             designId: null,
             isEditing: true,
-            name: ""
+            name: "",
+            showProperties: false,
+            saveStatus: 'Saved',
+            isModified: false,
+            lastModified: Date.now()
         })
     }
 }))

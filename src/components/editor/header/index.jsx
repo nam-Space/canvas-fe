@@ -11,6 +11,7 @@ import {
     ChevronDown,
     Download,
     Eye,
+    Loader2,
     LogOut,
     Pencil,
     Save,
@@ -19,9 +20,19 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import ExportModal from "../export";
+import { cn } from "@/lib/utils";
 
 const Header = () => {
-    const { canvas, isEditing, setIsEditing, name, setName } = useEditorStore();
+    const {
+        canvas,
+        designId,
+        isEditing,
+        setIsEditing,
+        name,
+        setName,
+        saveStatus,
+        markAsModified,
+    } = useEditorStore();
     const { data: session } = useSession();
     const [showExportModal, setShowExportModal] = useState(false);
 
@@ -37,6 +48,11 @@ const Header = () => {
             obj.evented = isEditing;
         });
     }, [isEditing]);
+
+    useEffect(() => {
+        if (!canvas || !designId) return;
+        markAsModified();
+    }, [name, canvas]);
 
     return (
         <header className="header-gradient header flex items-center justify-between px-4 h-14">
@@ -59,8 +75,30 @@ const Header = () => {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <button className="header-button ml-3 relative" title="Save">
-                    <Save className="w-5 h-5" />
+                <button
+                    className={
+                        "relative flex items-center justify-center p-1.5 rounded-md hover:bg-muted transition-colors"
+                    }
+                    title={saveStatus !== "Saving..." ? "Save" : saveStatus}
+                    disabled={saveStatus === "Saving..."}
+                >
+                    {saveStatus === "Saving..." ? (
+                        <div className="relative flex items-center">
+                            <Loader2 className="h-5 w-5 animate-spin text-white" />
+                            <span className="sr-only">Saving...</span>
+                        </div>
+                    ) : (
+                        <Save
+                            className={cn(
+                                "h-5 w-5",
+                                saveStatus === "Saved" && "text-white"
+                            )}
+                        />
+                    )}
+
+                    {saveStatus === "Saving..." && (
+                        <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
+                    )}
                 </button>
                 <button
                     onClick={() => setShowExportModal(true)}

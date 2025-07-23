@@ -15,7 +15,7 @@ import React, { useState } from "react";
 
 const SettingsPanel = () => {
     const [backgroundColor, setBackgroundColor] = useState("#ffffff");
-    const { canvas } = useEditorStore();
+    const { canvas, markAsModified } = useEditorStore();
 
     const handleColorChange = (e) => {
         setBackgroundColor(e.target.value);
@@ -31,6 +31,8 @@ const SettingsPanel = () => {
         canvas.renderAll();
 
         centerCanvas(canvas);
+
+        markAsModified();
     };
 
     return (

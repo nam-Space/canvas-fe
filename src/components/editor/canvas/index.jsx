@@ -1,4 +1,4 @@
-import { initializeFabric } from "@/fabric/fabric-utils";
+import { customizeBoundingBox, initializeFabric } from "@/fabric/fabric-utils";
 import { useEditorStore } from "@/store";
 import React, { useEffect, useRef } from "react";
 
@@ -8,7 +8,7 @@ const Canvas = () => {
     const fabricCanvasRef = useRef(null);
     const initAttemptedRef = useRef(false);
 
-    const { setCanvas } = useEditorStore();
+    const { setCanvas, markAsModified } = useEditorStore();
 
     useEffect(() => {
         const cleanUpCanvas = () => {
@@ -66,8 +66,10 @@ const Canvas = () => {
 
                 console.log("Canvas init is done and set in store");
 
+                customizeBoundingBox(fabricCanvas);
+
                 const handleCanvasChange = () => {
-                    // console.log("change");
+                    markAsModified();
                 };
 
                 fabricCanvas.on("object:added", handleCanvasChange);

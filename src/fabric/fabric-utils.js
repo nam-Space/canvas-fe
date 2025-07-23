@@ -243,3 +243,35 @@ export const deletedSelectedObject = (canvas) => {
         return null
     }
 }
+
+export const customizeBoundingBox = canvas => {
+    if (!canvas) return;
+
+    try {
+        canvas.on('object:added', e => {
+            if (e.target) {
+                e.target.set({
+                    borderColor: "#00ffe7",
+                    cornerColor: "#000000",
+                    cornerStrokeColor: "#00ffe7",
+                    cornerSize: 10,
+                    transparentCorners: false,
+                })
+            }
+        })
+
+        canvas.getObjects().forEach(obj => {
+            obj.set({
+                borderColor: "#00ffe7",
+                cornerColor: "#000000",
+                cornerStrokeColor: "#00ffe7",
+                cornerSize: 10,
+                transparentCorners: false,
+            })
+        })
+
+        canvas.renderAll()
+    } catch (e) {
+        console.error('Failed to customize bounding box')
+    }
+}

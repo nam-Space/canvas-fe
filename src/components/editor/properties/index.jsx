@@ -31,7 +31,7 @@ import {
 import { useEffect, useState } from "react";
 
 const Properties = () => {
-    const { canvas, setShowProperties } = useEditorStore();
+    const { canvas, setShowProperties, markAsModified } = useEditorStore();
 
     const [selectedObject, setSelectedObject] = useState(null);
     const [objectType, setObjectType] = useState("");
@@ -190,6 +190,7 @@ const Properties = () => {
 
         selectedObject.set(property, val);
         canvas.renderAll();
+        markAsModified();
     };
 
     const handleImageFilterChange = async (val) => {
@@ -228,6 +229,7 @@ const Properties = () => {
 
             selectedObject.applyFilters();
             canvas.renderAll();
+            markAsModified();
         } catch (e) {
             console.error("Failed to apply filters");
         }
@@ -256,6 +258,7 @@ const Properties = () => {
             ];
             selectedObject.applyFilters();
             canvas.renderAll();
+            markAsModified();
         } catch (e) {
             console.error("Error while applying blur", e);
         }
@@ -286,6 +289,7 @@ const Properties = () => {
                                     "scaleX",
                                     e.target.value / selectedObject.width
                                 );
+                                markAsModified();
                             }}
                             type="number"
                             min={1}
@@ -305,6 +309,7 @@ const Properties = () => {
                                     "scaleY",
                                     e.target.value / selectedObject.height
                                 );
+                                markAsModified();
                             }}
                             type="number"
                             min={1}
@@ -377,6 +382,7 @@ const Properties = () => {
                                 if (!canvas || !selectedObject) return;
                                 canvas.bringObjectToFront(selectedObject);
                                 canvas.renderAll();
+                                markAsModified();
                             }}
                         >
                             <MoveUp className="h-4 w-4" />
@@ -390,6 +396,7 @@ const Properties = () => {
                                 if (!canvas || !selectedObject) return;
                                 canvas.sendObjectToBack(selectedObject);
                                 canvas.renderAll();
+                                markAsModified();
                             }}
                         >
                             <MoveDown className="h-4 w-4" />
@@ -411,6 +418,7 @@ const Properties = () => {
                             onClick={async () => {
                                 if (!canvas || !selectedObject) return;
                                 await cloneSelectedObject(canvas);
+                                markAsModified();
                             }}
                         >
                             <Copy className="h-4 w-4" />
@@ -423,6 +431,7 @@ const Properties = () => {
                             onClick={() => {
                                 if (!canvas || !selectedObject) return;
                                 deletedSelectedObject(canvas);
+                                markAsModified();
                             }}
                         >
                             <Trash className="h-4 w-4" />

@@ -3,6 +3,7 @@
 import { getUserDesigns } from "@/services/design-service";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import DesignPreview from "./design-preview";
 
 const RecentDesigns = () => {
     const router = useRouter();
@@ -20,7 +21,7 @@ const RecentDesigns = () => {
     return (
         <div>
             <h2 className="text-xl font-bold mb-4">Recent Designs</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {!userDesigns.length && <h1>No Design Found!</h1>}
                 {userDesigns.map((design) => (
                     <div
@@ -28,7 +29,11 @@ const RecentDesigns = () => {
                         onClick={() => router.push(`/editor/${design?._id}`)}
                         className="group cursor-pointer"
                     >
-                        <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden transition-shadow group-hover:shadow-md"></div>
+                        <div className="w-[300px] h-[300px] rounded-lg mb-2 overflow-hidden transition-shadow group-hover:shadow-md">
+                            {design?.canvasData && (
+                                <DesignPreview design={design} />
+                            )}
+                        </div>
                         <p className="font-bold text-sm truncate">
                             {design.name}
                         </p>
