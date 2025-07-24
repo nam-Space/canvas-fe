@@ -30,8 +30,8 @@ const DesignPreview = ({ design }) => {
                 if (!canvasElement) return;
 
                 const designPreviewCanvas = new fabric.StaticCanvas(canvasId, {
-                    width: 300,
-                    height: 300,
+                    width: 5000,
+                    height: 5000,
                     renderOnAddRemove: true,
                 });
 
@@ -78,14 +78,7 @@ const DesignPreview = ({ design }) => {
         };
     }, [design?._id, canvasId]);
 
-    return (
-        <canvas
-            id={canvasId}
-            width={300}
-            height={300}
-            className="h-full w-full object-contain"
-        />
-    );
+    return <canvas id={canvasId} className="w-full h-full object-cover" />;
 };
 
 export default DesignPreview;

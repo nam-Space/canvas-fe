@@ -29,7 +29,7 @@ const RecentDesigns = () => {
                         onClick={() => router.push(`/editor/${design?._id}`)}
                         className="group cursor-pointer"
                     >
-                        <div className="w-[300px] h-[300px] rounded-lg mb-2 overflow-hidden transition-shadow group-hover:shadow-md">
+                        <div className="h-[300px] rounded-lg mb-2 overflow-hidden transition-shadow group-hover:shadow-md">
                             {design?.canvasData && (
                                 <DesignPreview design={design} />
                             )}
