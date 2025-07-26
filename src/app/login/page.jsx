@@ -10,7 +10,7 @@ const Login = () => {
                 className="absolute inset-0 bg-cover bg-center"
                 style={{
                     backgroundImage:
-                        "url(https://static.canva.com/web/images/543d7829999d351b301ced5ed3c1f087.jpg)",
+                        "url(https://static.canva.com/web/images/d1f2e2322db3c37709b72568cefe1e59.jpg)",
                 }}
             ></div>
             <div

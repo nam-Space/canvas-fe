@@ -79,6 +79,8 @@ export const designTypes = [
         icon: <Upload className="h-6 w-6 text-gray-700" />,
         label: "Upload",
         bgColor: "bg-gray-100",
+        width: 700,
+        height: 300,
     },
 ];
 

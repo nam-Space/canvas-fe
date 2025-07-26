@@ -177,7 +177,9 @@ const SubscriptionModal = ({ isOpen, onClose }) => {
                     </div>
                     <div className="hidden md:block md:w-[450px]">
                         <img
-                            src={"https://snipboard.io/vkMYQl.jpg"}
+                            src={
+                                "https://content-management-files.canva.com/ecf77e4e-094c-40aa-831d-2d16c6b75d17/7ba6fca6-0167-4ed0-9e79-8119eb0e113b.png"
+                            }
                             alt="Team Collaboration"
                             className="w-full h-full object-cover"
                         />

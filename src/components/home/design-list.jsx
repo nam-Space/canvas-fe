@@ -3,12 +3,19 @@
 import { useEditorStore } from "@/store";
 import { useRouter } from "next/navigation";
 import DesignPreview from "./design-preview";
-import { Trash2 } from "lucide-react";
+import { Loader, Trash2 } from "lucide-react";
 import { deleteDesign, getUserDesigns } from "@/services/design-service";
 
-const DesignList = () => {
+const DesignList = ({ isModalView }) => {
     const router = useRouter();
-    const { userDesigns, setUserDesigns } = useEditorStore();
+    const {
+        userDesigns,
+        setUserDesigns,
+        setShowDesignsModal,
+        userDesignsLoading,
+    } = useEditorStore();
+
+    const dataDesigns = isModalView ? userDesigns : userDesigns.slice(0, 4);
 
     const fetchUserDesigns = async () => {
         const result = await getUserDesigns();
@@ -23,13 +30,27 @@ const DesignList = () => {
         }
     };
 
+    if (userDesignsLoading)
+        return (
+            <div className="flex justify-center">
+                <Loader className="w-[40px] h-[40px]" />
+            </div>
+        );
+
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {!userDesigns.length && <h1>No Design Found!</h1>}
-            {userDesigns.map((design) => (
+        <div
+            className={`${
+                isModalView ? "p-4" : ""
+            } grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4`}
+        >
+            {!dataDesigns.length && <h1>No Design Found!</h1>}
+            {dataDesigns.map((design) => (
                 <div key={design._id} className="group cursor-pointer">
                     <div
-                        onClick={() => router.push(`/editor/${design?._id}`)}
+                        onClick={() => {
+                            router.push(`/editor/${design?._id}`);
+                            setShowDesignsModal(false);
+                        }}
                         className="h-[300px] rounded-lg mb-2 overflow-hidden transition-shadow group-hover:shadow-md"
                     >
                         {design?.canvasData && (

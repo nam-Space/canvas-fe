@@ -66,7 +66,7 @@ const Banner = () => {
             <Button
                 onClick={handleCreateNewDesign}
                 className={
-                    "text-[#8b3dff] bg-white hover:bg-gray-100 rounded-lg px-4 py-2 sm:px-6 sm:py-2.5"
+                    "text-[#8b3dff] bg-white hover:bg-gray-100 rounded-lg px-4 py-2 sm:px-6 sm:py-2.5 cursor-pointer"
                 }
             >
                 {loading && <Loader className="w-4 h-4" />}

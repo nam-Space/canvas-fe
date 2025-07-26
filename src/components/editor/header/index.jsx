@@ -23,6 +23,8 @@ import ExportModal from "../export";
 import { cn } from "@/lib/utils";
 import { MAX_FREE_DESIGNS } from "@/constants/limit";
 import { toast } from "sonner";
+import Image from "next/image";
+import Link from "next/link";
 
 const Header = () => {
     const {
@@ -77,6 +79,16 @@ const Header = () => {
     return (
         <header className="header-gradient header flex items-center justify-between px-4 h-14">
             <div className="flex items-center space-x-2">
+                <Link href={"/"}>
+                    <Image
+                        src="https://static.canva.com/web/images/856bac30504ecac8dbd38dbee61de1f1.svg"
+                        alt="canva"
+                        width={70}
+                        height={30}
+                        priority
+                    />
+                </Link>
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild="true">
                         <button className="header-button flex items-center text-white">
@@ -138,7 +150,7 @@ const Header = () => {
             <div className="flex items-center space-x-3">
                 <button
                     onClick={() => setShowPremiumModal(true)}
-                    className="upgrade-button flex items-center bg-white/10 hover:bg-white/20 text-white rounded-md h-9 px-3 transition-colors"
+                    className="cursor-pointer upgrade-button flex items-center bg-white/10 hover:bg-white/20 text-white rounded-md h-9 px-3 transition-colors"
                 >
                     <Star className="mr-1 h-4 w-4 text-yellow-400" />
                     <span>

@@ -7,8 +7,6 @@ const DesignPreview = ({ design }) => {
     const fabricCanvasRef = useRef(null);
 
     useEffect(() => {
-        if (!design.canvasData) return;
-
         const timer = setTimeout(async () => {
             try {
                 if (
@@ -46,6 +44,16 @@ const DesignPreview = ({ design }) => {
                             : design.canvasData;
                 } catch (e) {
                     console.error("Error parsing canvas data");
+                    return;
+                }
+
+                if (
+                    canvasData === undefined ||
+                    canvasData === null ||
+                    canvasData?.objects?.length === 0
+                ) {
+                    designPreviewCanvas.backgroundColor = "#f5f5f5";
+                    designPreviewCanvas.requestRenderAll();
                     return;
                 }
 

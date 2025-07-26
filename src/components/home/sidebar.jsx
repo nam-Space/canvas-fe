@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 const Sidebar = () => {
     const router = useRouter();
-    const { setShowPremiumModal } = useEditorStore();
+    const { setShowPremiumModal, setShowDesignsModal } = useEditorStore();
 
     const handleCreateNewDesign = async () => {
         try {
@@ -29,6 +29,14 @@ const Sidebar = () => {
             }
         } catch (e) {
             console.log(e);
+        }
+    };
+
+    const handleChooseItemSidebar = (menuItem) => {
+        if (menuItem.label === "Billing") {
+            setShowPremiumModal(true);
+        } else if (menuItem.label === "Projects") {
+            setShowDesignsModal(true);
         }
     };
 
@@ -65,11 +73,7 @@ const Sidebar = () => {
                 ].map((menuItem, index) => (
                     <div
                         key={index}
-                        onClick={
-                            menuItem.label === "Billing"
-                                ? () => setShowPremiumModal(true)
-                                : null
-                        }
+                        onClick={() => handleChooseItemSidebar(menuItem)}
                         className="flex flex-col items-center w-full"
                     >
                         <Link
