@@ -73,6 +73,15 @@ export const useEditorStore = create((set, get) => ({
         get().saveToServer()
     }, 500),
 
+    userSubscription: null,
+    setUserSubscription: (data) => set({ userSubscription: data }),
+
+    userDesigns: [],
+    setUserDesigns: data => set({ userDesigns: data }),
+
+    showPremiumModal: false,
+    setShowPremiumModal: flag => set({ showPremiumModal: flag }),
+
     resetStore: () => {
         set({
             canvas: null,

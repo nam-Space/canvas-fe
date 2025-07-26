@@ -21,6 +21,8 @@ import { signOut, useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import ExportModal from "../export";
 import { cn } from "@/lib/utils";
+import { MAX_FREE_DESIGNS } from "@/constants/limit";
+import { toast } from "sonner";
 
 const Header = () => {
     const {
@@ -32,6 +34,9 @@ const Header = () => {
         setName,
         saveStatus,
         markAsModified,
+        userSubscription,
+        userDesigns,
+        setShowPremiumModal,
     } = useEditorStore();
     const { data: session } = useSession();
     const [showExportModal, setShowExportModal] = useState(false);
@@ -53,6 +58,21 @@ const Header = () => {
         if (!canvas || !designId) return;
         markAsModified();
     }, [name, canvas]);
+
+    const handleExport = () => {
+        if (
+            userDesigns?.length > MAX_FREE_DESIGNS &&
+            !userSubscription?.isPremium
+        ) {
+            toast.error("Please upgrade to premium!", {
+                description:
+                    "You need to upgrade to premium to create more designs",
+            });
+            return;
+        }
+
+        setShowExportModal(true);
+    };
 
     return (
         <header className="header-gradient header flex items-center justify-between px-4 h-14">
@@ -101,9 +121,9 @@ const Header = () => {
                     )}
                 </button>
                 <button
-                    onClick={() => setShowExportModal(true)}
+                    onClick={handleExport}
                     className="header-button ml-3 relative"
-                    title="Download"
+                    title="Export"
                 >
                     <Download className="w-5 h-5" />
                 </button>
@@ -116,9 +136,16 @@ const Header = () => {
                 />
             </div>
             <div className="flex items-center space-x-3">
-                <button className="upgrade-button flex items-center bg-white/10 hover:bg-white/20 text-white rounded-md h-9 px-3 transition-colors">
+                <button
+                    onClick={() => setShowPremiumModal(true)}
+                    className="upgrade-button flex items-center bg-white/10 hover:bg-white/20 text-white rounded-md h-9 px-3 transition-colors"
+                >
                     <Star className="mr-1 h-4 w-4 text-yellow-400" />
-                    <span>Upgrade your plan</span>
+                    <span>
+                        {!userSubscription?.isPremium
+                            ? "Upgrade To Premium"
+                            : "Premium Member"}
+                    </span>
                 </button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild={"true"}>

@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEditorStore } from "@/store";
 import { getUserDesignByID } from "@/services/design-service";
 import Properties from "./properties";
+import SubscriptionModal from "../subscription/premium-modal";
 
 const MainEditor = () => {
     const params = useParams();
@@ -26,6 +27,8 @@ const MainEditor = () => {
         setShowProperties,
         showProperties,
         isEditing,
+        showPremiumModal,
+        setShowPremiumModal,
     } = useEditorStore();
 
     useEffect(() => {
@@ -174,6 +177,10 @@ const MainEditor = () => {
                     </main>
                 </div>
                 {showProperties && isEditing && <Properties />}
+                <SubscriptionModal
+                    isOpen={showPremiumModal}
+                    onClose={setShowPremiumModal}
+                />
             </div>
         </div>
     );

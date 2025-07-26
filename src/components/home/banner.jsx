@@ -5,12 +5,27 @@ import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { saveDesign } from "@/services/design-service";
 import { useRouter } from "next/navigation";
+import { useEditorStore } from "@/store";
+import { MAX_FREE_DESIGNS } from "@/constants/limit";
+import { toast } from "sonner";
 
 const Banner = () => {
+    const { userDesigns, userSubscription } = useEditorStore();
+
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleCreateNewDesign = async () => {
+        if (
+            userDesigns?.length > MAX_FREE_DESIGNS &&
+            !userSubscription?.isPremium
+        ) {
+            toast.error("Please upgrade to premium!", {
+                description:
+                    "You need to upgrade to premium to create more designs",
+            });
+            return;
+        }
         if (loading) return;
         try {
             setLoading(true);

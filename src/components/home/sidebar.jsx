@@ -1,12 +1,14 @@
 "use client";
 
 import { saveDesign } from "@/services/design-service";
+import { useEditorStore } from "@/store";
 import { CreditCard, FolderOpen, Home, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const Sidebar = () => {
     const router = useRouter();
+    const { setShowPremiumModal } = useEditorStore();
 
     const handleCreateNewDesign = async () => {
         try {
@@ -63,6 +65,11 @@ const Sidebar = () => {
                 ].map((menuItem, index) => (
                     <div
                         key={index}
+                        onClick={
+                            menuItem.label === "Billing"
+                                ? () => setShowPremiumModal(true)
+                                : null
+                        }
                         className="flex flex-col items-center w-full"
                     >
                         <Link
