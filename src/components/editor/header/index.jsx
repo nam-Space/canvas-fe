@@ -15,6 +15,7 @@ import {
     LogOut,
     Pencil,
     Save,
+    Share,
     Star,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
@@ -25,6 +26,7 @@ import { MAX_FREE_DESIGNS } from "@/constants/limit";
 import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
+import ShareModal from "../share";
 
 const Header = () => {
     const {
@@ -34,6 +36,8 @@ const Header = () => {
         setIsEditing,
         name,
         setName,
+        email,
+        publicFor,
         saveStatus,
         markAsModified,
         userSubscription,
@@ -42,18 +46,37 @@ const Header = () => {
     } = useEditorStore();
     const { data: session } = useSession();
     const [showExportModal, setShowExportModal] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
+
+    const isDisabledPermission = email !== session?.user?.email;
 
     const handleLogout = async () => {
         await signOut();
     };
 
     useEffect(() => {
+        if (publicFor[0]?.email === "all") {
+            setIsEditing(
+                publicFor[0].permission === "edit"
+                    ? true
+                    : session?.user?.email === email
+                    ? true
+                    : false
+            );
+        }
+    }, [publicFor, session]);
+
+    useEffect(() => {
         if (!canvas) return;
-        canvas.selection = isEditing;
-        canvas.getObjects().forEach((obj) => {
-            obj.selectable = isEditing;
-            obj.evented = isEditing;
-        });
+        const timer = setTimeout(() => {
+            canvas.selection = isEditing;
+            canvas.getObjects().forEach((obj) => {
+                obj.selectable = isEditing;
+                obj.evented = isEditing;
+            });
+        }, 300);
+
+        return () => clearTimeout(timer);
     }, [isEditing]);
 
     useEffect(() => {
@@ -90,18 +113,29 @@ const Header = () => {
                 </Link>
 
                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild="true">
+                    <DropdownMenuTrigger
+                        disabled={isDisabledPermission}
+                        asChild="true"
+                    >
                         <button className="header-button flex items-center text-white">
                             <span>{isEditing ? "Editing" : "Viewing"}</span>
                             <ChevronDown className="ml-1 h-4 w-4" />
                         </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
-                        <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                        <DropdownMenuItem
+                            onClick={() =>
+                                !isDisabledPermission && setIsEditing(true)
+                            }
+                        >
                             <Pencil className="mr-2 h-4 w-4" />
                             <span>Editing</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setIsEditing(false)}>
+                        <DropdownMenuItem
+                            onClick={() =>
+                                !isDisabledPermission && setIsEditing(false)
+                            }
+                        >
                             <Eye className="mr-2 h-4 w-4" />
                             <span>Viewing</span>
                         </DropdownMenuItem>
@@ -139,6 +173,15 @@ const Header = () => {
                 >
                     <Download className="w-5 h-5" />
                 </button>
+                {!isDisabledPermission && (
+                    <button
+                        onClick={() => setShowShareModal(true)}
+                        className="header-button ml-3 relative"
+                        title="Export"
+                    >
+                        <Share className="w-5 h-5" />
+                    </button>
+                )}
             </div>
             <div className="flex-1 flex justify-center max-w-md">
                 <Input
@@ -193,6 +236,7 @@ const Header = () => {
                 isOpen={showExportModal}
                 onClose={setShowExportModal}
             />
+            <ShareModal isOpen={showShareModal} onClose={setShowShareModal} />
         </header>
     );
 };

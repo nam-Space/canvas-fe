@@ -22,6 +22,12 @@ export const useEditorStore = create((set, get) => ({
     name: '',
     setName: value => set({ name: value }),
 
+    email: '',
+    setEmail: value => set({ email: value }),
+
+    publicFor: [],
+    setPublicFor: value => set({ publicFor: value }),
+
     showProperties: false,
     setShowProperties: flag => set({ showProperties: flag }),
 

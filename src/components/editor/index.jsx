@@ -9,10 +9,12 @@ import { useEditorStore } from "@/store";
 import { getUserDesignByID } from "@/services/design-service";
 import Properties from "./properties";
 import SubscriptionModal from "../subscription/premium-modal";
+import { useSession } from "next-auth/react";
 
 const MainEditor = () => {
     const params = useParams();
     const router = useRouter();
+    const { data: session } = useSession();
     const designId = params?.slug;
 
     const [isLoading, setIsLoading] = useState(!!designId);
@@ -24,9 +26,12 @@ const MainEditor = () => {
         setDesignId,
         resetStore,
         setName,
+        setPublicFor,
+        setEmail,
         setShowProperties,
         showProperties,
         isEditing,
+        setIsEditing,
         showPremiumModal,
         setShowPremiumModal,
     } = useEditorStore();
@@ -76,7 +81,28 @@ const MainEditor = () => {
             const design = response.data;
             if (design) {
                 setName(design.name);
+                setPublicFor(design.publicFor || []);
                 setDesignId(designId);
+                setEmail(design.email);
+                const publicFor = design.publicFor;
+                if (publicFor.length > 0) {
+                    if (publicFor[0].email === "all") {
+                        setIsEditing(
+                            publicFor[0].permission === "edit" ? true : false
+                        );
+                    } else {
+                        const email = session?.user?.email;
+                        const emailFound = publicFor.find(
+                            (user) => user.email === email
+                        );
+                        if (emailFound) {
+                            setIsEditing(
+                                emailFound.permission === "edit" ? true : false
+                            );
+                        }
+                    }
+                }
+
                 try {
                     if (design.canvasData) {
                         canvas.clear();

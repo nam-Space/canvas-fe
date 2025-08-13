@@ -11,9 +11,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     ],
     callbacks: {
         async jwt({ token, account }) {
-            console.log(`--------jwt--------`)
-            console.log(`token=${JSON.stringify(token, null, 2)}`)
-            console.log(`account=${JSON.stringify(account, null, 2)}`)
 
             if (account?.id_token) {
                 token.idToken = account.id_token
@@ -75,9 +72,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
 
         async session({ session, token }) {
-            console.log(`--------session--------`)
             session.idToken = token.idToken
-            console.log(`session=${JSON.stringify(session, null, 2)}`)
             return session
         }
     }
