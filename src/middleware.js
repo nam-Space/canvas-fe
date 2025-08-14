@@ -10,6 +10,7 @@ export default auth(async req => {
     const pathname = req.nextUrl.pathname
 
     if (!isAuthUser) {
+        if (isLoginPage) return null;
         return Response.redirect(new URL('/login', req.url))
     }
 

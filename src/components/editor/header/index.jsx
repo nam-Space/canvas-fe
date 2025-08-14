@@ -143,7 +143,7 @@ const Header = () => {
                 </DropdownMenu>
                 <button
                     className={
-                        "relative flex items-center justify-center p-1.5 rounded-md hover:bg-muted transition-colors"
+                        "relative flex items-center justify-center p-1.5 rounded-md header-button transition-colors"
                     }
                     title={saveStatus !== "Saving..." ? "Save" : saveStatus}
                     disabled={saveStatus === "Saving..."}
@@ -187,7 +187,8 @@ const Header = () => {
                 <Input
                     className={"w-full"}
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    disabled={!isEditing}
+                    onChange={(e) => isEditing && setName(e.target.value)}
                 />
             </div>
             <div className="flex items-center space-x-3">
