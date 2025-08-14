@@ -9,12 +9,11 @@ import { useEditorStore } from "@/store";
 import { getUserDesignByID } from "@/services/design-service";
 import Properties from "./properties";
 import SubscriptionModal from "../subscription/premium-modal";
-import { useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 
 const MainEditor = () => {
     const params = useParams();
     const router = useRouter();
-    const { data: session } = useSession();
     const designId = params?.slug;
 
     const [isLoading, setIsLoading] = useState(!!designId);
@@ -91,6 +90,7 @@ const MainEditor = () => {
                             publicFor[0].permission === "edit" ? true : false
                         );
                     } else {
+                        const session = await getSession();
                         const email = session?.user?.email;
                         const emailFound = publicFor.find(
                             (user) => user.email === email
