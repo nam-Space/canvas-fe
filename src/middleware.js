@@ -1,7 +1,7 @@
 import axios from "axios";
 import { auth } from "./auth";
 
-const API_URL = process.env.API_URL || 'http://localhost:5000'
+const NEXT_PUBLIC_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:5000'
 
 export default auth(async req => {
     const isLoginPage = req.nextUrl.pathname.startsWith("/login")
@@ -18,7 +18,7 @@ export default auth(async req => {
         const designId = pathname.split('/')[2]
         try {
             const res = await axios({
-                url: `${API_URL}/v1/designs/${designId}`,
+                url: `${NEXT_PUBLIC_GATEWAY_URL}/v1/designs/${designId}`,
                 method: 'GET',
                 headers: {
                     Authorization: `Bearer ${req.auth.idToken}`,

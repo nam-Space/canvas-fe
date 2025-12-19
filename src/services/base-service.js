@@ -2,7 +2,7 @@ import axios from "axios"
 import { getSession } from "next-auth/react"
 
 
-const API_URL = process.env.API_URL || 'http://localhost:5000'
+const NEXT_PUBLIC_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:5000'
 
 export async function fetchWithAuth(endpoint, options = {}) {
     const session = await getSession()
@@ -13,7 +13,7 @@ export async function fetchWithAuth(endpoint, options = {}) {
 
     try {
         const response = await axios({
-            url: `${API_URL}${endpoint}`,
+            url: `${NEXT_PUBLIC_GATEWAY_URL}${endpoint}`,
             method: options.method || 'GET',
             headers: {
                 Authorization: `Bearer ${session.idToken}`,
